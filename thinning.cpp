@@ -65,7 +65,7 @@ void execThinningGuoHall(cv::Mat& src, cv::Mat& dst)
     cv::bitwise_xor(src, cv::Scalar(255, 255, 255), dst);
     //imwrite("c:/img/bw.png", dst);
     //cv::Mat bw;
-    cv::cvtColor(dst, dst, CV_BGR2GRAY);
+    //cv::cvtColor(dst, dst, CV_BGR2GRAY);
     applyGaussianBlur(dst, dst, 11, 0,0);
     imwrite("c:/img/gauss.png",dst);
     threshold( dst, dst, 110, 255,0 );

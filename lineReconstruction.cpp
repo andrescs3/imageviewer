@@ -32,7 +32,6 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
                uchar pk =  src1.at<uchar>(j,i);
                uchar p =  src1.at<uchar>(j,i) == 255   ? 0:1;
-               //cout<<(int)pk<<"+-"<<i<<endl;
                if(pk==0)
                {
 
@@ -46,17 +45,17 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                     uchar p8 = src1.at<uchar>(j-1,i-1)== 255   ? 0:1;
 
                     int val = getCode(p1,p2,p3,p4,p5,p6,p7,p8);
-                   // cout<<val<<endl;
+
                     if(isEndPoint(val))
                     {
-                        //circle(src12,Point(i,j),0,CV_RGB(0,255,0),1);
+
                         pos[nPoints][0] = j;
                         pos[nPoints][1] = i;
                         pos[nPoints][2] = val;
                         pos[nPoints][3] = 0;
                         pos[nPoints][4] = 0;
                         pos[nPoints][5] = 0;
-                        //cout<<"no"<<endl;
+
                         nPoints++;
                     }
 
@@ -80,8 +79,6 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
             if(flag != 1)
             {
-
-               // putText(src12,str, Point(x0,y0), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255,0,0));
                 pos[k][3] = 1;
                 Point p = nextPoint(x0, y0, 20, src2);
                 for(int m=0; m<nPoints; m++)
@@ -101,7 +98,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                         stringstream ss;
                         ss << a1;
                         string str2 = ss.str();
-                       // putText(src12,str2, Point(x1,y1), CV_FONT_HERSHEY_SIMPLEX, 0.5, CV_RGB(255,0,0));
+
                     }
                 }
             }
@@ -136,23 +133,16 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                     if(!deletePoints(dir, dir1))
                     {
                         pos[m][2] = 0;
-                        //break;
+
                     }
                     if(abs(y0-y1)< max)
                     {
                         max = abs(y0-y1);
                         yd = yi;
                         xd = xi;
-                        /*if(m-1>= 0)
-                        {
-                        }*/
-                    }
-                   /* else
-                    {
-                        pos[m][3] = 0;
+
                     }
 
-                    */
 
                 }
             }
@@ -163,10 +153,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
             }
 
 
-           // stringstream s1s;
-            //s1s << pos[i][2];
-           // string str3 = s1s.str();
-          //  putText(src12,str3, Point(x0,y0), CV_FONT_HERSHEY_SIMPLEX, 0.3, CV_RGB(255,0,0));
+
 
 
         }
