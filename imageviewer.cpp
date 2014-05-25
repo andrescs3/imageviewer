@@ -204,6 +204,8 @@ void ImageViewer::createActions()
     cleanIsolatedAct = new QAction(tr("Clean Isolated Pixels"), this);
     connect(cleanIsolatedAct, SIGNAL(triggered()), this, SLOT(cleanIsolated()));
 
+    cleanIsolatedLinesAct = new QAction(tr("Clean Isolated Lines"), this);
+    connect(cleanIsolatedLinesAct, SIGNAL(triggered()), this, SLOT(cleanIsolatedLines()));
 
 }
 //! [18]
@@ -230,6 +232,7 @@ void ImageViewer::createMenus()
     actionsMenu->addAction(thinningZhangAct);
     actionsMenu->addAction(lineReconstructionAct);
     actionsMenu->addAction(cleanIsolatedAct);
+    actionsMenu->addAction(cleanIsolatedLinesAct);
     //helpMenu = new QMenu(tr("&Help"), this);
   //  helpMenu->addAction(aboutAct);
    // helpMenu->addAction(aboutQtAct);
@@ -344,6 +347,28 @@ void ImageViewer::cleanIsolated()
 {
     std::string fileNames = source+"result.png";
     limpia::exec_limpiarPxAislados(src, dst);
+    imwrite(fileNames, dst);
+    QString qstr= QString::fromStdString(fileNames);
+    QImage images(qstr);
+    src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
+
+//! [2] //! [3]
+    imageLabel->setPixmap(QPixmap::fromImage(images));
+//! [3] //! [4]
+    scaleFactor = 1.0;
+
+    printAct->setEnabled(true);
+    fitToWindowAct->setEnabled(true);
+    updateActions();
+    if (!fitToWindowAct->isChecked())
+        imageLabel->adjustSize();
+    src = dst;
+}
+
+void ImageViewer::cleanIsolatedLines()
+{
+    std::string fileNames = source+"result.png";
+    limpia::exec_limpiarTrazosAislados(src, dst);
     imwrite(fileNames, dst);
     QString qstr= QString::fromStdString(fileNames);
     QImage images(qstr);

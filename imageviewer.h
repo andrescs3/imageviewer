@@ -74,6 +74,7 @@ private slots:
     void thinningZhang();
     void lineReconstruction();
     void cleanIsolated();
+    void cleanIsolatedLines();
 
 private:
     void createActions();
@@ -102,6 +103,8 @@ private:
     QAction *thinningZhangAct;
     QAction *lineReconstructionAct;
     QAction *cleanIsolatedAct;
+    QAction *cleanIsolatedLinesAct;
+
 
     QMenu *fileMenu;
     QMenu *viewMenu;
