@@ -303,7 +303,11 @@ void  ImageViewer::thinningGuoHall()
 void ImageViewer::lineReconstruction()
 {
     std::string fileNames = source+"result.png";
-    execLineReconstruction(src, dst, 20);
+    for(int k=0; k<10; k++)
+    {
+        execLineReconstruction(src, dst, 30);
+    }
+
     imwrite(fileNames, dst);
     QString qstr= QString::fromStdString(fileNames);
     QImage images(qstr);

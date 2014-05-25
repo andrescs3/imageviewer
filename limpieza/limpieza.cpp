@@ -145,7 +145,8 @@ uchar limpia::trazoAislado(Mat &img, Mat &imgOrigi, int x, int y) {
 int limpia::exec_limpiarTrazosAislados(Mat &imgOrigi, Mat &imgDest) {
 	Mat imgBinaria;
 	imgDest = imgOrigi.clone();
-	threshold(imgOrigi, imgBinaria, 200, 255, CV_THRESH_BINARY_INV); // filtro de umbral para obtener la versión binaria
+
+    threshold(imgOrigi, imgBinaria, 200, 255, CV_THRESH_BINARY_INV); // filtro de umbral para obtener la versión binaria
 	copyMakeBorder(imgBinaria, imgBinaria, 1, 1, 1, 1, BORDER_CONSTANT, 0); // agregamos borde de 1px
 	
 	int imgAlto = imgBinaria.rows;

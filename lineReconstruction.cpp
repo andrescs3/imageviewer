@@ -32,7 +32,6 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
                uchar pk =  src1.at<uchar>(j,i);
                uchar p =  src1.at<uchar>(j,i) == 255   ? 0:1;
-               //cout<<(int)pk<<"+-"<<i<<endl;
                if(pk==0)
                {
 
@@ -46,17 +45,17 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                     uchar p8 = src1.at<uchar>(j-1,i-1)== 255   ? 0:1;
 
                     int val = getCode(p1,p2,p3,p4,p5,p6,p7,p8);
-                   // cout<<val<<endl;
+
                     if(isEndPoint(val))
                     {
-                        //circle(src12,Point(i,j),0,CV_RGB(0,255,0),1);
+
                         pos[nPoints][0] = j;
                         pos[nPoints][1] = i;
                         pos[nPoints][2] = val;
                         pos[nPoints][3] = 0;
                         pos[nPoints][4] = 0;
                         pos[nPoints][5] = 0;
-                        //cout<<"no"<<endl;
+
                         nPoints++;
                     }
 
@@ -80,8 +79,6 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
             if(flag != 1)
             {
-
-
                 pos[k][3] = 1;
                 Point p = nextPoint(x0, y0, 20, src2);
                 for(int m=0; m<nPoints; m++)
