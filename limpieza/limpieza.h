@@ -19,8 +19,9 @@ uchar getCodVecindad(Mat &img, int x, int y);
 // true si es el código greenlee de un punto final de línea
 bool codPuntoFinal(uchar codVecindad);
 // Colorea de blanco un vector de Point en una Mat binaria
-void marcarTrazo(vector <Point *> vec, Mat &mat);
-uchar trazoAislado(Mat &img, int x, int y);
+void marcarPuntos(vector <Point *> vec, Mat &mat, uchar intensidad);
+void marcarTrazo(vector <Point *> vec, Mat &matBin, Mat &matOrigi);
+uchar trazoAislado(Mat &img, Mat &imgOrigi, int x, int y);
 // true si el pixel se encuentra aislado
 uchar pixelAislado(Mat &img, int x, int y);
 
@@ -28,7 +29,7 @@ uchar pixelAislado(Mat &img, int x, int y);
 // Remueve los pixeles aislados
 // Devuelve en imgDest
 int exec_limpiarPxAislados(Mat &imgOrigi, Mat &imgDest);
-int metodoTrazoAislado(Mat &imgBinaria);
+int exec_limpiarTrazosAislados(Mat &imgOrigi, Mat &imgDest);
 }
 
 #endif	/* LIMPIEZA_H */

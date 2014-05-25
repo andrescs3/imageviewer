@@ -38,21 +38,30 @@ bool limpia::codPuntoFinal(uchar codVecindad) {
 }
 
 
-// Colorea de blanco un vector de Point en una Mat binaria
-void limpia::marcarTrazo(vector <Point *> vec, Mat &mat) {
+// Colorea un vector de Points en una Mat binaria con el valor "intensidad"
+void limpia::marcarPuntos(vector <Point *> vec, Mat &mat, uchar intensidad) {
 	Point *pun;
 	for(vector<Point *>::iterator it = vec.begin(); it != vec.end(); ++it) {
 		pun = *it;
-		mat.at<uchar>(pun->y, pun->x) = 255;
+		mat.at<uchar>(pun->y, pun->x) = intensidad;
 	}
 }
 
-uchar limpia::trazoAislado(Mat &img, int x, int y) {
+void limpia::marcarTrazo(vector <Point *> vec, Mat &matBin, Mat &matOrigi) {
+	Point *pun;
+	for(vector<Point *>::iterator it = vec.begin(); it != vec.end(); ++it) {
+		pun = *it;
+		matBin.at<uchar>(pun->y, pun->x) = 0;
+		matOrigi.at<uchar>(pun->y-1, pun->x-1) = 255;
+	}
+}
+
+// Si en (x,y) hay un trazo, lo elimina
+uchar limpia::trazoAislado(Mat &img, Mat &imgOrigi, int x, int y) {
 	uchar codVecindad = getCodVecindad(img, x, y);
 	
+	// Si es un punto final de línea...
 	if (codPuntoFinal(codVecindad)) {
-		// Si marca un punto final de línea...
-		
 		// Marcamos el trazo mientras se conserve delgado (1px)
 		bool continuar = true, marcar = false;
 		uchar dir = 0;
@@ -73,7 +82,7 @@ uchar limpia::trazoAislado(Mat &img, int x, int y) {
 				case 32: dir = 6; xSig=xAnt-1; ySig=yAnt; break;
 				case 64: dir = 7; xSig=xAnt-1; ySig=yAnt-1; break;
 				case 128: dir = 0; xSig=xAnt; ySig=yAnt-1; break;
-				default: cout << "(" << xAnt << "," << yAnt << ") codigo " << (int)codVecindad << endl; return 0; break;
+				//default: cout << "(" << xAnt << "," << yAnt << ") codigo " << (int)codVecindad << endl; return 0; break;
 			}
 			
 			vecTrazo.push_back(new Point(xAnt, yAnt));
@@ -113,7 +122,7 @@ uchar limpia::trazoAislado(Mat &img, int x, int y) {
 				else if (numMarcas > numNegros) { marcar = true; }
 				
 				if (marcar) {
-					//marcarTrazo(vecTrazo);
+					marcarTrazo(vecTrazo, img, imgOrigi);
 				}
 				
 				continuar = false;
@@ -133,11 +142,40 @@ uchar limpia::trazoAislado(Mat &img, int x, int y) {
 	return 0;
 }
 
+int limpia::exec_limpiarTrazosAislados(Mat &imgOrigi, Mat &imgDest) {
+	Mat imgBinaria;
+	imgDest = imgOrigi.clone();
+	threshold(imgOrigi, imgBinaria, 200, 255, CV_THRESH_BINARY_INV); // filtro de umbral para obtener la versión binaria
+	copyMakeBorder(imgBinaria, imgBinaria, 1, 1, 1, 1, BORDER_CONSTANT, 0); // agregamos borde de 1px
+	
+	int imgAlto = imgBinaria.rows;
+	int imgAncho = imgBinaria.cols;
+	int x, y, numTrazosMarcados = 0;
+	uchar* fila;
+	uchar intensidad, a;
+	
+	for (y = 1 ; y <= (imgAlto - 1) ; ++y) {
+		fila = imgBinaria.ptr<uchar>(y);
+		for (x = 1 ; x <= (imgAncho - 1) ; ++x) {
+			intensidad = fila[x]; // valor de intensidad del pixel
+			if (intensidad == 255) {
+				a = trazoAislado(imgBinaria, imgDest, x, y);
+				if (a > 0) { numTrazosMarcados++; }
+			}
+		}
+	}
+	
+	//imwrite( "D:/binaria.bmp", imgBinaria);
+	
+	cout << "metodoTrazoAislado marco " << numTrazosMarcados << " trazos." << endl;
+	return numTrazosMarcados;
+}
+
 
 // true si el pixel se encuentra aislado
 uchar limpia::pixelAislado(Mat &img, int x, int y) {
 	uchar codVecindad = getCodVecindad(img, x, y); // aplicamos codificación Greenlee (1987)
-    cout << x << "," << y << " " << (int)codVecindad << endl;
+	//cout << x << "," << y << " " << (int)codVecindad << endl;
 	return (codVecindad == 0);
 }
 
@@ -146,11 +184,8 @@ uchar limpia::pixelAislado(Mat &img, int x, int y) {
 // Devuelve en imgDest
 int limpia::exec_limpiarPxAislados(Mat &imgOrigi, Mat &imgDest) {
 	Mat imgBinaria;
-
-    threshold(imgOrigi, imgBinaria, 200, 255, CV_THRESH_BINARY_INV); // filtro de umbral para obtener la versión binaria
-
-    //cv::bitwise_xor(imgOrigi, cv::Scalar(255, 255, 255), imgBinaria);
-    copyMakeBorder(imgBinaria, imgBinaria, 1, 1, 1, 1, BORDER_CONSTANT, 0); // agregamos borde de 1px
+	threshold(imgOrigi, imgBinaria, 200, 255, CV_THRESH_BINARY_INV); // filtro de umbral para obtener la versión binaria
+	copyMakeBorder(imgBinaria, imgBinaria, 1, 1, 1, 1, BORDER_CONSTANT, 0); // agregamos borde de 1px
 	
 	int imgAlto = imgBinaria.rows;
 	int imgAncho = imgBinaria.cols;
@@ -159,51 +194,19 @@ int limpia::exec_limpiarPxAislados(Mat &imgOrigi, Mat &imgDest) {
 	uchar intensidad;
 	
 	imgDest = imgOrigi.clone();
-
-    //namedWindow("A", WINDOW_AUTOSIZE);
-   // imshow("A", imgBinaria);
-    //waitKey(0);
-    imwrite("c:/img/imgBinaria.png", imgBinaria);
-    cout<<"iniciando limpieza"<<endl;
-    for (y = 1 ; y < (imgAlto - 1) ; ++y) {
-        fila = imgBinaria.ptr<uchar>(y);
+	
+	for (y = 1 ; y < (imgAlto - 1) ; ++y) {
+		fila = imgBinaria.ptr<uchar>(y);
 		for (x = 1 ; x < (imgAncho - 1) ; ++x) {
-            intensidad = fila[x];
-            cout<<(int) intensidad<<endl;
+			intensidad = fila[x];
 			if (intensidad == 255) {
-                if (pixelAislado(imgBinaria, x, y)) {
-                    imgDest.at<uchar>(y-1, x-1) = 255;
+				if (pixelAislado(imgBinaria, x, y)) {
+					imgDest.at<uchar>(y-1, x-1) = 255;
 					numPxMarcados++;
 				}
 			}
 		}
 	}
-    cout<<numPxMarcados<<endl;
+	
 	return numPxMarcados;
-}
-
-
-int limpia::metodoTrazoAislado(Mat &imgBinaria) {
-	Mat imgBinTrazos = imgBinaria.clone();
-	int imgAlto = imgBinaria.rows;
-	int imgAncho = imgBinaria.cols;
-	int x, y, numTrazosMarcados = 0;
-	uchar* fila;
-	uchar intensidad, a;
-	
-	for (y = 1 ; y < (imgAlto - 1) ; ++y) {
-		fila = imgBinaria.ptr<uchar>(y);
-		for (x = 1 ; x < (imgAncho - 1) ; ++x) {
-			intensidad = fila[x]; // valor de intensidad del pixel
-			if (intensidad == 255) {
-				if ((y > 0) && (y < imgAlto - 1) && (x > 0) && (x < imgAncho - 1)) {
-					a = trazoAislado(imgBinTrazos, x, y);
-					if (a > 0) { numTrazosMarcados++; }
-				}
-			}
-		}
-	}
-	
-	cout << "metodoTrazoAislado marco " << numTrazosMarcados << " trazos." << endl;
-	return numTrazosMarcados;
 }
