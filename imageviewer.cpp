@@ -15,12 +15,11 @@
 
 using namespace cv;
 
-std::string source = "c:/img/";
+std::string resultFileName = "D:/result.png";
 Mat src;
 Mat dst;
-//! [0]
-ImageViewer::ImageViewer()
-{
+
+ImageViewer::ImageViewer() {
     imageLabel = new QLabel;
     imageLabel->setBackgroundRole(QPalette::Base);
     imageLabel->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
@@ -37,26 +36,28 @@ ImageViewer::ImageViewer()
     setWindowTitle(tr("Image Viewer"));
     resize(500, 400);
 }
-//! [0]
 
-//! [1]
-void ImageViewer::open()
-//! [1] //! [2]
-{
-    QString fileName = QFileDialog::getOpenFileName(this,
-                                    tr("Open File"), QDir::currentPath());
+
+void ImageViewer::open() {
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"), QDir::currentPath());
     if (!fileName.isEmpty()) {
         QImage image(fileName);
         if (image.isNull()) {
-            QMessageBox::information(this, tr("Image Viewer"),
-                                     tr("Cannot load %1.").arg(fileName));
+            QMessageBox::information(this, tr("Image Viewer"), tr("Cannot load %1.").arg(fileName));
             return;
         }
 
-        src = imread(fileName.toStdString(),CV_LOAD_IMAGE_GRAYSCALE);
-//! [2] //! [3]
+        // cargamos la imagen seleccionada
+        src = imread(fileName.toStdString());
+
+        // Convertimos según el formato de la imagen
+        int nchannels = src.channels();
+        if (nchannels == 3) {
+            cvtColor(src, src, CV_BGR2GRAY); // a escala de grises
+        }
+
+
         imageLabel->setPixmap(QPixmap::fromImage(image));
-//! [3] //! [4]
         scaleFactor = 1.0;
 
         printAct->setEnabled(true);
@@ -67,17 +68,12 @@ void ImageViewer::open()
             imageLabel->adjustSize();
     }
 }
-//! [4]
 
-//! [5]
-void ImageViewer::print()
-//! [5] //! [6]
-{
+
+void ImageViewer::print() {
     Q_ASSERT(imageLabel->pixmap());
 #if !defined(QT_NO_PRINTER) && !defined(QT_NO_PRINTDIALOG)
-//! [6] //! [7]
     QPrintDialog dialog(&printer, this);
-//! [7] //! [8]
     if (dialog.exec()) {
         QPainter painter(&printer);
         QRect rect = painter.viewport();
@@ -87,38 +83,23 @@ void ImageViewer::print()
         painter.setWindow(imageLabel->pixmap()->rect());
         painter.drawPixmap(0, 0, *imageLabel->pixmap());
     }
-
-
 #endif
 }
-//! [8]
 
-//! [9]
-void ImageViewer::zoomIn()
-//! [9] //! [10]
-{
+void ImageViewer::zoomIn() {
     scaleImage(1.25);
-    ;
 }
 
-void ImageViewer::zoomOut()
-{
+void ImageViewer::zoomOut() {
     scaleImage(0.8);
 }
 
-//! [10] //! [11]
-void ImageViewer::normalSize()
-//! [11] //! [12]
-{
+void ImageViewer::normalSize() {
     imageLabel->adjustSize();
     scaleFactor = 1.0;
 }
-//! [12]
 
-//! [13]
-void ImageViewer::fitToWindow()
-//! [13] //! [14]
-{
+void ImageViewer::fitToWindow() {
     bool fitToWindow = fitToWindowAct->isChecked();
     scrollArea->setWidgetResizable(fitToWindow);
     if (!fitToWindow) {
@@ -126,13 +107,9 @@ void ImageViewer::fitToWindow()
     }
     updateActions();
 }
-//! [14]
 
 
-//! [15]
-void ImageViewer::about()
-//! [15] //! [16]
-{
+void ImageViewer::about() {
     QMessageBox::about(this, tr("About Image Viewer"),
             tr("<p>The <b>Image Viewer</b> example shows how to combine QLabel "
                "and QScrollArea to display an image. QLabel is typically used "
@@ -147,12 +124,8 @@ void ImageViewer::about()
                "zooming and scaling features. </p><p>In addition the example "
                "shows how to use QPainter to print an image.</p>"));
 }
-//! [16]
 
-//! [17]
-void ImageViewer::createActions()
-//! [17] //! [18]
-{
+void ImageViewer::createActions() {
     openAct = new QAction(tr("&Open..."), this);
     openAct->setShortcut(tr("Ctrl+O"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
@@ -187,11 +160,11 @@ void ImageViewer::createActions()
     fitToWindowAct->setShortcut(tr("Ctrl+F"));
     connect(fitToWindowAct, SIGNAL(triggered()), this, SLOT(fitToWindow()));
 
-    aboutAct = new QAction(tr("&About"), this);
+    /*aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 
     aboutQtAct = new QAction(tr("About &Qt"), this);
-    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));*/
 
     thinningGuoHallAct = new QAction(tr("Thinning Guo Hall"), this);
     connect(thinningGuoHallAct, SIGNAL(triggered()), this, SLOT(thinningGuoHall()));
@@ -212,9 +185,7 @@ void ImageViewer::createActions()
 //! [18]
 
 //! [19]
-void ImageViewer::createMenus()
-//! [19] //! [20]
-{
+void ImageViewer::createMenus() {
     fileMenu = new QMenu(tr("&File"), this);
     fileMenu->addAction(openAct);
     fileMenu->addAction(printAct);
@@ -242,22 +213,15 @@ void ImageViewer::createMenus()
     menuBar()->addMenu(viewMenu);
     menuBar()->addMenu(actionsMenu);
 }
-//! [20]
 
-//! [21]
-void ImageViewer::updateActions()
-//! [21] //! [22]
-{
+void ImageViewer::updateActions() {
     zoomInAct->setEnabled(!fitToWindowAct->isChecked());
     zoomOutAct->setEnabled(!fitToWindowAct->isChecked());
     normalSizeAct->setEnabled(!fitToWindowAct->isChecked());
 }
-//! [22]
 
-//! [23]
-void ImageViewer::scaleImage(double factor)
-//! [23] //! [24]
-{
+
+void ImageViewer::scaleImage(double factor) {
     Q_ASSERT(imageLabel->pixmap());
     scaleFactor *= factor;
     imageLabel->resize(scaleFactor * imageLabel->pixmap()->size());
@@ -268,127 +232,72 @@ void ImageViewer::scaleImage(double factor)
     zoomInAct->setEnabled(scaleFactor < 3.0);
     zoomOutAct->setEnabled(scaleFactor > 0.333);
 }
-//! [24]
 
-//! [25]
-void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor)
-//! [25] //! [26]
-{
+
+void ImageViewer::adjustScrollBar(QScrollBar *scrollBar, double factor) {
     scrollBar->setValue(int(factor * scrollBar->value()
                             + ((factor - 1) * scrollBar->pageStep()/2)));
 }
-//! [26]
 
-void  ImageViewer::thinningGuoHall()
-{
 
-        std::string fileNames = source+"result.png";
-        execThinningGuoHall(src, dst);
-        imwrite(fileNames, dst);
-        QString qstr= QString::fromStdString(fileNames);
-        QImage images(qstr);
-        src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-    //! [2] //! [3]
-        imageLabel->setPixmap(QPixmap::fromImage(images));
-    //! [3] //! [4]
-        scaleFactor = 1.0;
+/* Muestra la imagen de resultado en pantalla */
+void ImageViewer::showResultImage() {
+    // Cargamos el último resultado como una QImage
+    QString qstr = QString::fromStdString(resultFileName);
+    QImage resultImage(qstr);
 
-        printAct->setEnabled(true);
-        fitToWindowAct->setEnabled(true);
-        updateActions();
-        if (!fitToWindowAct->isChecked())
-            imageLabel->adjustSize();
-        src = dst;
+    // Mostramos la imagen
+    imageLabel->setPixmap(QPixmap::fromImage(resultImage));
+    scaleFactor = 1.0;
+    printAct->setEnabled(true);
+    fitToWindowAct->setEnabled(true);
+    updateActions();
+    if (!fitToWindowAct->isChecked())
+        imageLabel->adjustSize();
 }
 
-void ImageViewer::lineReconstruction()
-{
-    std::string fileNames = source+"result.png";
-    for(int k=0; k<2; k++)
-    {
-        execLineReconstruction(src, dst, 20 + k*5);
-        imwrite(fileNames, dst);
-        QString qstr= QString::fromStdString(fileNames);
-        QImage images(qstr);
-        src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-    //! [2] //! [3]
-        imageLabel->setPixmap(QPixmap::fromImage(images));
-    //! [3] //! [4]
-        scaleFactor = 1.0;
-
-        printAct->setEnabled(true);
-        fitToWindowAct->setEnabled(true);
-        updateActions();
-        if (!fitToWindowAct->isChecked())
-            imageLabel->adjustSize();
-        src = dst;
+/* Guarda la imagen de resultado en disco */
+void ImageViewer::saveResultImage() {
+    bool resultado = imwrite(resultFileName, dst);
+    if (!resultado) {
+        QMessageBox msgBox(QMessageBox::Warning, tr("No se pudo guardar la imagen"), tr("No se pudo guardar la imagen de resultado en la ruta configurada."), 0, this);
+        msgBox.exec();
     }
-
-
 }
 
-void  ImageViewer::thinningZhang()
-{
-
-        std::string fileNames = source+"result.png";
-        execThinningZhang(src, dst);
-        imwrite(fileNames, dst);
-        QString qstr= QString::fromStdString(fileNames);
-        QImage images(qstr);
-        src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-    //! [2] //! [3]
-        imageLabel->setPixmap(QPixmap::fromImage(images));
-    //! [3] //! [4]
-        scaleFactor = 1.0;
-
-        printAct->setEnabled(true);
-        fitToWindowAct->setEnabled(true);
-        updateActions();
-        if (!fitToWindowAct->isChecked())
-            imageLabel->adjustSize();
-        src = dst;
+void  ImageViewer::thinningGuoHall() {
+    execThinningGuoHall(src, dst);
+    src = dst.clone();
+    saveResultImage();
+    showResultImage();
 }
 
-void ImageViewer::cleanIsolated()
-{
-    std::string fileNames = source+"result.png";
+void ImageViewer::lineReconstruction() {
+    for(int k=0; k<2; k++) {
+        execLineReconstruction(src, dst, 20 + k*5);
+        src = dst.clone();
+        saveResultImage();
+        showResultImage();
+    }
+}
+
+void  ImageViewer::thinningZhang() {
+    execThinningZhang(src, dst);
+    src = dst.clone();
+    saveResultImage();
+    showResultImage();
+}
+
+void ImageViewer::cleanIsolated() {
     limpia::exec_limpiarPxAislados(src, dst);
-    imwrite(fileNames, dst);
-    QString qstr= QString::fromStdString(fileNames);
-    QImage images(qstr);
-    src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-
-//! [2] //! [3]
-    imageLabel->setPixmap(QPixmap::fromImage(images));
-//! [3] //! [4]
-    scaleFactor = 1.0;
-
-    printAct->setEnabled(true);
-    fitToWindowAct->setEnabled(true);
-    updateActions();
-    if (!fitToWindowAct->isChecked())
-        imageLabel->adjustSize();
-    src = dst;
+    src = dst.clone();
+    saveResultImage();
+    showResultImage();
 }
 
-void ImageViewer::cleanIsolatedLines()
-{
-    std::string fileNames = source+"result.png";
+void ImageViewer::cleanIsolatedLines() {
     limpia::exec_limpiarTrazosAislados(src, dst);
-    imwrite(fileNames, dst);
-    QString qstr= QString::fromStdString(fileNames);
-    QImage images(qstr);
-    src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-
-//! [2] //! [3]
-    imageLabel->setPixmap(QPixmap::fromImage(images));
-//! [3] //! [4]
-    scaleFactor = 1.0;
-
-    printAct->setEnabled(true);
-    fitToWindowAct->setEnabled(true);
-    updateActions();
-    if (!fitToWindowAct->isChecked())
-        imageLabel->adjustSize();
-    src = dst;
+    src = dst.clone();
+    saveResultImage();
+    showResultImage();
 }

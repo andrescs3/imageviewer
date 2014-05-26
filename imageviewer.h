@@ -70,6 +70,9 @@ private slots:
     void normalSize();
     void fitToWindow();
     void about();
+    void showResultImage();
+    void saveResultImage();
+
     void thinningGuoHall();
     void thinningZhang();
     void lineReconstruction();
