@@ -304,26 +304,27 @@ void  ImageViewer::thinningGuoHall()
 void ImageViewer::lineReconstruction()
 {
     std::string fileNames = source+"result.png";
-    for(int k=0; k<10; k++)
+    for(int k=0; k<2; k++)
     {
-        execLineReconstruction(src, dst, 30);
+        execLineReconstruction(src, dst, 20 + k*5);
+        imwrite(fileNames, dst);
+        QString qstr= QString::fromStdString(fileNames);
+        QImage images(qstr);
+        src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
+    //! [2] //! [3]
+        imageLabel->setPixmap(QPixmap::fromImage(images));
+    //! [3] //! [4]
+        scaleFactor = 1.0;
+
+        printAct->setEnabled(true);
+        fitToWindowAct->setEnabled(true);
+        updateActions();
+        if (!fitToWindowAct->isChecked())
+            imageLabel->adjustSize();
+        src = dst;
     }
 
-    imwrite(fileNames, dst);
-    QString qstr= QString::fromStdString(fileNames);
-    QImage images(qstr);
-    src = imread(fileNames,CV_LOAD_IMAGE_GRAYSCALE);
-//! [2] //! [3]
-    imageLabel->setPixmap(QPixmap::fromImage(images));
-//! [3] //! [4]
-    scaleFactor = 1.0;
 
-    printAct->setEnabled(true);
-    fitToWindowAct->setEnabled(true);
-    updateActions();
-    if (!fitToWindowAct->isChecked())
-        imageLabel->adjustSize();
-    src = dst;
 }
 
 void  ImageViewer::thinningZhang()

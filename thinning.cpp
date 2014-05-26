@@ -68,7 +68,7 @@ void execThinningGuoHall(cv::Mat& src, cv::Mat& dst)
     //cv::cvtColor(dst, dst, CV_BGR2GRAY);
     applyGaussianBlur(dst, dst, 11, 0,0);
     imwrite("c:/img/gauss.png",dst);
-    threshold( dst, dst, 110, 255,0 );
+    threshold( dst, dst, 50, 255,0 );
     cv::imwrite("c:/img/resize.png",dst);
 
     thinningGuoHall(dst);

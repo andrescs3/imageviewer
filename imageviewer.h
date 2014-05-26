@@ -99,6 +99,8 @@ private:
     QAction *fitToWindowAct;
     QAction *aboutAct;
     QAction *aboutQtAct;
+
+
     QAction *thinningGuoHallAct;
     QAction *thinningZhangAct;
     QAction *lineReconstructionAct;

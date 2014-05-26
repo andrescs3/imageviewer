@@ -16,9 +16,8 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
     //Mat dst2 = imread("c:/img/result.png", CV_LOAD_IMAGE_COLOR);
     //int h = 10;
     //Mat src = imread("c:/img/result.png", CV_LOAD_IMAGE_GRAYSCALE);
-    Mat src2 = src.clone();
-    Mat src3 = src.clone();
-    Mat src4 = src.clone();
+
+
     Mat src1 = src.clone();
     dst = src.clone();
 
@@ -67,6 +66,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
         for(int k=0; k<nPoints; k++)
         {
+            Mat src2 = src.clone();
             int y0 = pos[k][0];
             int x0 = pos[k][1];
             int dir = pos[k][2];
@@ -80,7 +80,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
             if(flag != 1)
             {
                 pos[k][3] = 1;
-                Point p = nextPoint(x0, y0, 20, src2);
+                Point p = nextPoint(x0, y0, 50, src2);
                 for(int m=0; m<nPoints; m++)
                 {
                     int y1 = pos[m][0];
@@ -94,10 +94,10 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                         pos[m][3] = 1;
                         pos[m][4] = y0;
                         pos[m][5] = x0;
-                        int a1 = pos[m][2];
-                        stringstream ss;
-                        ss << a1;
-                        string str2 = ss.str();
+                       // int a1 = pos[m][2];
+                       // stringstream ss;
+                        //ss << a1;
+                        //string str2 = ss.str();
 
                     }
                 }
@@ -109,6 +109,8 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
         for(int k=0; k<nPoints; k++)
         {
+            Mat src3 = src.clone();
+
             int y0 = pos[k][0];
             int x0 = pos[k][1];
             int flag = pos[k][3];
@@ -118,8 +120,10 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
             int xd = -1;
             int yd = -1;
             double max = INFINITY;
+            cout<<"************"<<endl;
             for(int m=0; m<nPoints; m++)
             {
+                Mat src4 = src.clone();
                 int yi = pos[m][0];
                 int xi = pos[m][1];
                 int flag = pos[m][3];
@@ -128,20 +132,23 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
                 int y1 = pos[m][4];
                 int x1 = pos[m][5];
                 int dir1 = pos[m][2];
-                if(y1==y0 && x1==x0 && (yi != y0) && (xi != x0))
+                if(y1==y0 && x1==x0 && (yi != y0  || xi != x0))
                 {
                     if(!deletePoints(dir, dir1))
                     {
                         pos[m][2] = 0;
 
                     }
-                    if(abs(y0-y1)< max)
-                    {
-                        max = abs(y0-y1);
-                        yd = yi;
-                        xd = xi;
+                    else{
+                        if(abs(y0-y1)< max)
+                        {
+                            max = abs(y0-y1);
+                            yd = yi;
+                            xd = xi;
 
+                        }
                     }
+
 
 
                 }
@@ -183,9 +190,9 @@ Point nextPoint(int x, int y, int limit, Mat dst)
     {
        int val = getDir(x,y, dst);
        int a = i;
-       stringstream ss;
-       ss << a;
-       string str = ss.str();
+       //stringstream ss;
+      // ss << a;
+       //string str = ss.str();
        dst.at<uchar>(y,x) = 255;
        int x0 = x;
        int y0 = y;
@@ -241,52 +248,61 @@ double dirEndPoint(int x, int y, int limit, Mat dst)
     int cont = 0;
     for(int i=0; i<limit; i++)
     {
+        int vaj = dst.at<uchar>(y,x);
         if(dst.at<uchar>(y,x) == 0)
         {
             int val = getDir(x,y, dst);
-            cout<<val<<endl;
-            dir += getChainDir(val);
-            int a = i;
-            stringstream ss;
-            ss << a;
-            string str = ss.str();
-            dst.at<uchar>(y,x) = 255;
-            int x0 = x;
-            int y0 = y;
-
-            switch(val)
+            if(isEndPoint(val))
             {
-                case 1:
-                    y = y-1;
-                    x = x+1;
-                break;
-                case 2:
-                    x = x+1;
-                break;
-                case 4:
-                    y = y+1;
-                    x = x+1;
-                break;
-                case 8:
-                    y=y+1;
-                break;
-                case 16:
-                    y=y+1;
-                    x=x-1;
-                break;
-                case 32:
-                    x= x-1;
-                break;
-                case 64:
-                    y = y-1;
-                    x = x-1;
-                break;
-                case 128:
-                    y = y - 1;
+                cout<<val<<endl;
+                dir += getChainDir(val);
+                int a = i;
+                stringstream ss;
+                ss << a;
+                string str = ss.str();
+                dst.at<uchar>(y,x) = 255;
+                int x0 = x;
+                int y0 = y;
+
+                switch(val)
+                {
+                    case 1:
+                        y = y-1;
+                        x = x+1;
+                    break;
+                    case 2:
+                        x = x+1;
+                    break;
+                    case 4:
+                        y = y+1;
+                        x = x+1;
+                    break;
+                    case 8:
+                        y=y+1;
+                    break;
+                    case 16:
+                        y=y+1;
+                        x=x-1;
+                    break;
+                    case 32:
+                        x= x-1;
+                    break;
+                    case 64:
+                        y = y-1;
+                        x = x-1;
+                    break;
+                    case 128:
+                        y = y - 1;
+                    break;
+                }
+
+                cont++;
+            }
+            else
+            {
                 break;
             }
 
-            cont++;
         }
 
 
@@ -302,7 +318,6 @@ double dirEndPoint(int x, int y, int limit, Mat dst)
 int getDir(int x, int y, Mat dst)
 {
        uchar p1 = dst.at<uchar>(y-1,x)== 255   ? 0:1;
-
 
        uchar p2 = dst.at<uchar>(y-1,x+1)== 255   ? 0:1;
 
@@ -401,3 +416,4 @@ bool deletePoints(int d1, int d2)
 
     return false;
 }
+
