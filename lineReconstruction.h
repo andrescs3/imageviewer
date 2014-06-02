@@ -16,6 +16,7 @@ int getDir(int, int , Mat);
 double dirEndPoint(int, int , int, Mat);
 int changeDir(int);
 bool deletePoints(int, int);
-int getChainDir(int);
+double getChainDir(int);
 void execLineReconstruction(cv::Mat&, cv::Mat&, int);
+int getCodeDir(double);
 #endif // LINERECONSTRUCTION_H

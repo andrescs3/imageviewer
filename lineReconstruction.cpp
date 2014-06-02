@@ -10,6 +10,8 @@ using namespace std;
 
 
 int pos[20000][6];
+double points[10];
+
 
 void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 {
@@ -17,9 +19,11 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
     //int h = 10;
     //Mat src = imread("c:/img/result.png", CV_LOAD_IMAGE_GRAYSCALE);
 
+    Mat dst2 = src.clone();
 
     Mat src1 = src.clone();
     dst = src.clone();
+    cvtColor(dst, dst2, CV_GRAY2BGR);
 
 
         int nPoints = 0;
@@ -156,7 +160,10 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
 
             if(xd != -1 && yd != -1)
             {
+                //Mat dst2 = dst.clone();
+
                 line(dst,Point(x0,y0),Point(xd,yd),CV_RGB(0,255,0),1,1);
+                line(dst2,Point(x0,y0),Point(xd,yd),CV_RGB(255,0,0),1,1);
             }
 
 
@@ -166,7 +173,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
         }
 
 
-         imwrite("c:/img/result2.png", dst);
+         imwrite("c:/img/result2.png", dst2);
 
 
 
@@ -255,11 +262,12 @@ double dirEndPoint(int x, int y, int limit, Mat dst)
             if(isEndPoint(val))
             {
                 cout<<val<<endl;
-                dir += getChainDir(val);
+                //dir += getChainDir(val);
+                points[i] = getChainDir(val);
                 int a = i;
-                stringstream ss;
-                ss << a;
-                string str = ss.str();
+                //stringstream ss;
+               // ss << a;
+               // string str = ss.str();
                 dst.at<uchar>(y,x) = 255;
                 int x0 = x;
                 int y0 = y;
@@ -308,11 +316,63 @@ double dirEndPoint(int x, int y, int limit, Mat dst)
 
     }
 
-        if(dir!= 0)
+    double p1 = points[0];
+    double acum = 0.0;
+
+    for(int k=0; k<cont; k++)
+    {
+        double p2 = points[k];
+        if(abs(p1-p2)<=180)
         {
-            return dir/cont;
+            p1 = (p1+p2)/2;
         }
+        else
+        {
+            p1 = (p1+p2)/2;
+            p1 = p1+180.0;
+        }
+    }
+
+     return getCodeDir(p1);
+}
+
+
+int getCodeDir(double d)
+{
+    if(d> 337.5 && d<= 22.5)
+    {
+        return 2;
+    }
+    if(d>22.5 && d<= 67.5)
+    {
+        return 1;
+    }
+    if(d>67.5 && d <= 112.5)
+    {
         return 0;
+    }
+    if(d> 112.5 && d <= 157.5)
+    {
+        return 7;
+    }
+    if(d> 157.5 && d <= 202.5)
+    {
+        return 6;
+    }
+    if(d> 202.5 && d<= 247.5)
+    {
+        return 5;
+    }
+    if(d>247.5 & d<= 292.5)
+    {
+        return 4;
+    }
+    if(d>292.5 && d<=337.5)
+    {
+        return 3;
+    }
+
+    return 0;
 }
 
 int getDir(int x, int y, Mat dst)
@@ -338,7 +398,7 @@ int getDir(int x, int y, Mat dst)
 
        return val;
 }
-
+/*
 int getChainDir(int dir)
 {
     switch(dir)
@@ -351,16 +411,38 @@ int getChainDir(int dir)
             return 3;
         case 8:
           return 4;
-
         case 16:
             return 5;
-
         case 32:
             return 6;
         case 64:
             return 7;
         case 128:
             return 0;
+    }
+}
+*/
+
+double getChainDir(int dir)
+{
+    switch(dir)
+    {
+        case 1:
+            return 45.0;
+        case 2:
+            return 0.0;
+        case 4:
+            return 315.0;
+        case 8:
+          return 270.0;
+        case 16:
+            return 224.0;
+        case 32:
+            return 180.0;
+        case 64:
+            return 135.0;
+        case 128:
+            return 90.0;
     }
 }
 
