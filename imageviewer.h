@@ -78,6 +78,7 @@ private slots:
     void lineReconstruction();
     void cleanIsolated();
     void cleanIsolatedLines();
+    void cleanBodies();
 
 private:
     void createActions();
@@ -109,7 +110,7 @@ private:
     QAction *lineReconstructionAct;
     QAction *cleanIsolatedAct;
     QAction *cleanIsolatedLinesAct;
-
+    QAction *cleanBodiesAct;
 
     QMenu *fileMenu;
     QMenu *viewMenu;

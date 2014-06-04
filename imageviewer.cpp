@@ -9,6 +9,8 @@
 #include "thinning.h"
 #include "limpieza/limpieza.h"
 #include "lineReconstruction.h"
+#include "cuerpos/Cuerpo.h"
+#include "cuerpos/cuerpos.h"
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
@@ -181,6 +183,9 @@ void ImageViewer::createActions() {
     cleanIsolatedLinesAct = new QAction(tr("Clean Isolated Lines"), this);
     connect(cleanIsolatedLinesAct, SIGNAL(triggered()), this, SLOT(cleanIsolatedLines()));
 
+    cleanBodiesAct = new QAction(tr("Clean Bodies"), this);
+    connect(cleanBodiesAct, SIGNAL(triggered()), this, SLOT(cleanBodies()));
+
 }
 //! [18]
 
@@ -205,6 +210,7 @@ void ImageViewer::createMenus() {
     actionsMenu->addAction(lineReconstructionAct);
     actionsMenu->addAction(cleanIsolatedAct);
     actionsMenu->addAction(cleanIsolatedLinesAct);
+    actionsMenu->addAction(cleanBodiesAct);
     //helpMenu = new QMenu(tr("&Help"), this);
   //  helpMenu->addAction(aboutAct);
    // helpMenu->addAction(aboutQtAct);
@@ -274,7 +280,7 @@ void  ImageViewer::thinningGuoHall() {
 
 void ImageViewer::lineReconstruction() {
     for(int k=0; k<2; k++) {
-        execLineReconstruction(src, dst, 20 + k*5);
+        execLineReconstruction(src, dst, 20 + k*20);
         src = dst.clone();
         saveResultImage();
         showResultImage();
@@ -300,4 +306,13 @@ void ImageViewer::cleanIsolatedLines() {
     src = dst.clone();
     saveResultImage();
     showResultImage();
+}
+
+void ImageViewer::cleanBodies()
+{
+    cuerpos::exec_limpiarCuerpos(src, dst);
+    src = dst.clone();
+    saveResultImage();
+    showResultImage();
+
 }

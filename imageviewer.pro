@@ -5,13 +5,18 @@ HEADERS       = imageviewer.h \
     thinning.h \
     lineReconstruction.h \
     commonFilters.h \
-    limpieza/limpieza.h
+    limpieza/limpieza.h \
+    cuerpos/Cuerpo.h \
+    cuerpos/cuerpos.h
 SOURCES       = imageviewer.cpp \
                 main.cpp \
     thinning.cpp \
     lineReconstruction.cpp \
     commonFilters.cpp \
-    limpieza/limpieza.cpp
+    limpieza/limpieza.cpp \
+    cuerpos/Cuerpo.cpp \
+    cuerpos/cuerpos.cpp \
+    lineReconstruction - copia.cpp
 
 # install
 target.path = $$[QT_INSTALL_EXAMPLES]/widgets/widgets/imageviewer
