@@ -124,7 +124,7 @@ void execLineReconstruction(cv::Mat& src, cv::Mat& dst, int h)
             int xd = -1;
             int yd = -1;
             double max = INFINITY;
-            cout<<"************"<<endl;
+           // cout<<"************"<<endl;
             for(int m=0; m<nPoints; m++)
             {
                 Mat src4 = src.clone();
@@ -261,7 +261,7 @@ double dirEndPoint(int x, int y, int limit, Mat dst)
             int val = getDir(x,y, dst);
             if(isEndPoint(val))
             {
-                cout<<val<<endl;
+                //cout<<val<<endl;
                 //dir += getChainDir(val);
                 points[i] = getChainDir(val);
                 int a = i;
