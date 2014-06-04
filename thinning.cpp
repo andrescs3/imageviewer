@@ -63,6 +63,7 @@ void execThinningGuoHall(cv::Mat& src, cv::Mat& dst)
 {
     if (src.empty()) return;
     cv::bitwise_xor(src, cv::Scalar(255, 255, 255), dst);
+    copyMakeBorder(dst, dst, 1, 1, 1, 1, BORDER_CONSTANT, 0); // agregamos borde de 1px
     //imwrite("c:/img/bw.png", dst);
     //cv::Mat bw;
     //cv::cvtColor(dst, dst, CV_BGR2GRAY);
